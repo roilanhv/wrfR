@@ -31,12 +31,32 @@ getGRID <- function(filename)
   close.nc(nc)
   
   if (map.proj == 1){  #  "Lambert Conformal"
-    WRFproj <- paste('+proj=lcc +lat_1=',lat_1,' +lat_2=',lat_2,' +lat_0=',lat_0,' +lon_0=',lon_0,' +a=6370000 +es=0.0',sep='')
+    WRFproj <- paste('+proj=lcc +lat_1=',lat_1,
+                     ' +lat_2=',lat_2,
+                     ' +lat_0=',lat_0,
+                     ' +lon_0=',lon_0,
+                     ' +a=6370000 +es=0.0',
+                     sep='')
   }  
   if (map.proj == 2){  #  "Polar Stereographic" 
-    WRFproj <- paste('+proj=stere',' +lat_ts=',lat_2,' +lat_0=',lat_0,' +lon_0=',lon_0,' +a=6370000 +es=0.0',sep='')
+    WRFproj <- paste('+proj=stere',
+                     ' +lat_ts=',lat_2,
+                     ' +lat_0=',lat_0,
+                     ' +lon_0=',lon_0,
+                     ' +a=6370000 +es=0.0',
+                     sep='')
   } 
+  if(map.proj == 6){
+    WRFproj <- paste('+proj=eqc',
+                     ' +lat_ts=',lat_2,
+                     ' +lat_0=',lat_0,
+                     ' +lon_0=',lon_0,
+                     ' +a=6370000 +es=0.0',
+                     sep='')
+  }
   
-  output <- list(lat_WRF=lat_WRF,lon_WRF=lon_WRF,HGT_WRF=HGT_WRF,WRFproj=WRFproj,cosalpha=cosalpha,sinalpha=sinalpha)
+  output <- list(lat_WRF=lat_WRF,lon_WRF=lon_WRF,
+                 HGT_WRF=HGT_WRF,WRFproj=WRFproj,
+                 cosalpha=cosalpha,sinalpha=sinalpha)
   return(output)
 }
