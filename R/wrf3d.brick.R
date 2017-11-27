@@ -12,23 +12,38 @@
 #'  @author I. Lopez-Coto, 2014 (israel.lopez@@dfa.uhu.es / inl@@nist.gov)
 #'  @export
 
-wrf3d.brick <- function(subset3d,lon_WRF,lat_WRF,proj.latlon,WRFproj,reproject=TRUE)
-{
-  
-  for (vl in 1:dim(subset3d)[[3]])
-  {
-    rr.p <- wrf2d.raster(subset=subset3d[,,vl],lon_WRF,lat_WRF,proj.latlon,WRFproj,reproject=FALSE)
-    if (vl == 1){
-      r.out<-rr.p
-    } else {
-      r.out <- addLayer(r.out,rr.p)
-    }
+
+wrf3d.brick <-
+  function(subset3d,
+           lon_WRF,
+           lat_WRF,
+           proj.latlon,
+           WRFproj,
+           zout,
+           reproject = TRUE){
     
-  }  # end vertical levels
-  
-  if (reproject){
-    r.out <- projectRaster(r.out,crs=proj.latlon)
+    for (vl in 1:dim(subset3d)[[3]])
+    {
+      rr.p <- wrf2d.raster(
+        subset = subset3d[, , vl],
+        lon_WRF,
+        lat_WRF,
+        proj.latlon,
+        WRFproj,
+        reproject = FALSE
+      )
+      if (vl == 1) {
+        r.out <- rr.p
+      } else {
+        r.out <- addLayer(r.out, rr.p)
+      }
+      
+    }  # end vertical levels
+    
+    if (reproject) {
+      r.out <- projectRaster(r.out, crs = proj.latlon)
+    }
+      names(r.out) <- paste0("HGT.",zout)
+      
+      return(r.out)
   }
-  
-  return(r.out)  
-}
