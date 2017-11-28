@@ -18,25 +18,36 @@
 #  } 
 #  }
 
-wrf2d.raster <- function(subset,lon_WRF,lat_WRF,proj.latlon,WRFproj,reproject=TRUE)
+wrf2d.raster <- function(subset,
+                         lon_WRF,
+                         lat_WRF,
+                         proj.latlon,
+                         WRFproj,
+                         reproject = TRUE)
 {
   require(rgdal)
   require(raster)
-  sp.data <- data.frame(lon=as.vector(lon_WRF), lat=as.vector(lat_WRF), conc=as.vector(subset))
   
-  coordinates(sp.data) <- ~ lon+lat
+  sp.data <-
+    data.frame(
+      lon = as.vector(lon_WRF),
+      lat = as.vector(lat_WRF),
+      conc = as.vector(subset)
+    )
+  
+  coordinates(sp.data) <- ~ lon + lat
   proj4string(sp.data) = CRS(proj.latlon)
   
-  sp.data.proj <- spTransform(sp.data,CRSobj=CRS(WRFproj))
+  sp.data.proj <- spTransform(sp.data, CRSobj = CRS(WRFproj))
   
   ## Create raster object
-  r <- raster(ncols=ncol(lat_WRF),nrows=nrow(lat_WRF))
+  r <- raster(ncols = ncol(lat_WRF), nrows = nrow(lat_WRF))
   r[] <- 0
   extent(r) <- extent(sp.data.proj)
-  projection(r) <- projection(sp.data.proj)   
-  r.p <- rasterize(coordinates(sp.data.proj),r,sp.data.proj$conc)
-  if (reproject){
-    r.p <- projectRaster(r.p,crs=proj.latlon)
+  projection(r) <- projection(sp.data.proj)
+  r.p <- rasterize(coordinates(sp.data.proj), r, sp.data.proj$conc)
+  if (reproject) {
+    r.p <- projectRaster(r.p, crs = proj.latlon)
   }
   
   return(r.p)
