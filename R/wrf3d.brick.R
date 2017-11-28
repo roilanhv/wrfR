@@ -22,28 +22,65 @@ wrf3d.brick <-
            zout,
            reproject = TRUE){
     
-    for (vl in 1:dim(subset3d)[[3]])
-    {
-      rr.p <- wrf2d.raster(
-        subset = subset3d[, , vl],
-        lon_WRF,
-        lat_WRF,
-        proj.latlon,
-        WRFproj,
-        reproject = FALSE
-      )
-      if (vl == 1) {
-        r.out <- rr.p
-      } else {
-        r.out <- addLayer(r.out, rr.p)
-      }
-      
-    }  # end vertical levels
+    require(parallel)
+    
+    r.out <-
+      mclapply(1:dim(subset3d)[[3]],
+               function(ilayer) {
+                 wrf2d.raster(subset = subset3d[, , ilayer],
+                              lon_WRF,
+                              lat_WRF,
+                              proj.latlon,
+                              WRFproj,
+                              reproject = FALSE) %>%
+                   return()
+               },
+               mc.cores = detectCores() - 1,
+               mc.preschedule = FALSE) %>%
+      brick() 
     
     if (reproject) {
       r.out <- projectRaster(r.out, crs = proj.latlon)
     }
-      names(r.out) <- paste0("HGT.",zout)
-      
+    
+      if(max(zout) == 1.0){
+        names(r.out) <- paste0("LEV.",round(zout[1:nlayers(r.out)],3))
+      } else {
+        names(r.out) <- paste0("HGT.",zout[1:nlayers(r.out)])
+      }
+     
       return(r.out)
   }
+
+
+# 
+# system.time(
+#   r.out <-  foreach(vl = 1:dim(subset3d)[[3]]) %dopar%
+#     wrf2d.raster(subset = subset3d[, , vl],
+#                  lon_WRF,
+#                  lat_WRF,
+#                  proj.latlon,
+#                  WRFproj,
+#                  reproject = FALSE) %>% 
+#     brick()    )
+# 
+# system.time(
+#   for (vl in 1:dim(subset3d)[[3]]){
+#     rr.p <- wrf2d.raster(
+#       subset = subset3d[, , vl],
+#       lon_WRF,
+#       lat_WRF,
+#       proj.latlon,
+#       WRFproj,
+#       reproject = FALSE
+#     )
+#     if (vl == 1) {
+#       r.out <- rr.p
+#     } else {
+#       r.out <- addLayer(r.out, rr.p)
+#     }
+#     
+#     
+#   }  # end vertical levels
+# )
+
